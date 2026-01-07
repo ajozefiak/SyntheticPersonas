@@ -1,0 +1,27 @@
+[build-system]
+requires = ["setuptools>=64", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "persona-gepa"
+version = "0.1.0"
+description = "GEPA + DSPy framework for optimizing synthetic persona system prompts."
+readme = "README.md"
+requires-python = ">=3.9"
+dependencies = [
+  "dspy-ai>=2.4.0",
+]
+
+[project.optional-dependencies]
+dev = [
+  "pytest>=7.0",
+]
+
+[tool.setuptools]
+package-dir = {"" = "src"}
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
