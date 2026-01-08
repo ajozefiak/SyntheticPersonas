@@ -18,6 +18,12 @@ Set your API key:
 export OPENAI_API_KEY=...
 ```
 
+If you use an OpenAI-compatible gateway, set the base URL too:
+
+```
+export OPENAI_API_BASE=https://your-gateway.example.com/api/v2
+```
+
 ## Data Format
 
 Training data expects a list of interviews. Each interview is a list of turns with `interviewer_question` and `respondent_answer` keys:
@@ -38,7 +44,9 @@ JSONL is also supported (one interview per line).
 Optimize a persona prompt:
 
 ```
-python -m persona_gepa.optimize --data-path data/interviews.json --output-dir artifacts/persona_gepa
+python -m persona_gepa.optimize --data-path data/interviews.json \
+  --output-dir artifacts/persona_gepa \
+  --api-base https://your-gateway.example.com/api/v2
 ```
 
 Run inference with an optimized artifact:
@@ -46,7 +54,8 @@ Run inference with an optimized artifact:
 ```
 python -m persona_gepa.infer --artifact-path artifacts/persona_gepa/persona_gepa_artifact.json \
   --history "Q: Where did you grow up?\nA: I grew up in Austin.\n" \
-  --question "What do you enjoy doing?"
+  --question "What do you enjoy doing?" \
+  --api-base https://your-gateway.example.com/api/v2
 ```
 
 ## Databricks Notes

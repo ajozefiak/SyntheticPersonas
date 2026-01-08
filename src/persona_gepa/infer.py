@@ -21,7 +21,10 @@ def run_inference(
 ) -> str:
     configure_dspy_cache(config.cache_dir)
     persona_lm = build_lm(
-        config.persona_model, config.persona_temperature, config.persona_max_tokens
+        config.persona_model,
+        config.persona_temperature,
+        config.persona_max_tokens,
+        api_base=config.api_base,
     )
     configure_dspy_lm(persona_lm)
     program = load_program(artifact_path, lm=persona_lm)
@@ -56,6 +59,11 @@ def _build_parser() -> argparse.ArgumentParser:
     parser.add_argument("--persona-temperature", type=float, default=0.2)
     parser.add_argument("--persona-max-tokens", type=int, default=512)
 
+    parser.add_argument(
+        "--api-base",
+        help="Optional API base URL for OpenAI-compatible endpoints.",
+    )
+
     parser.add_argument("--cache-dir", default=".cache/dspy")
 
     return parser
@@ -82,6 +90,7 @@ def main(argv: Optional[List[str]] = None) -> int:
         persona_model=args.persona_model,
         persona_temperature=args.persona_temperature,
         persona_max_tokens=args.persona_max_tokens,
+        api_base=args.api_base,
         cache_dir=args.cache_dir,
     )
 

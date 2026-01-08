@@ -1,3 +1,5 @@
+import os
+
 from persona_gepa.config import PersonaGEPAConfig
 from persona_gepa.data import build_train_val_examples, format_history
 from persona_gepa.infer import run_inference
@@ -18,12 +20,19 @@ interviews = [
     ]
 ]
 
+# In Databricks, set your OpenAI-compatible API credentials and base URL.
+# Example (use your secret scope/key):
+# api_key = dbutils.secrets.get(scope="your-scope", key="your-key")
+# os.environ["OPENAI_API_KEY"] = api_key
+# os.environ["OPENAI_API_BASE"] = "https://your-gateway.example.com/api/v2"
+
 trainset, valset = build_train_val_examples(interviews, val_ratio=0.5, seed=7)
 
 config = PersonaGEPAConfig(
     output_dir="artifacts/persona_gepa_demo",
     cache_dir=".cache/dspy",
     num_threads=4,
+    api_base=os.getenv("OPENAI_API_BASE"),
 )
 
 program, artifact_path, report = run_optimization(config, trainset, valset)

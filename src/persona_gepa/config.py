@@ -20,6 +20,8 @@ class PersonaGEPAConfig:
 
     num_threads: int = 8
 
+    api_base: Optional[str] = None
+
     cache_dir: str = ".cache/dspy"
     output_dir: str = "artifacts/persona_gepa"
     log_dir: str = "logs/persona_gepa"

@@ -109,16 +109,23 @@ def run_optimization(
     configure_dspy_cache(config.cache_dir)
 
     persona_lm = build_lm(
-        config.persona_model, config.persona_temperature, config.persona_max_tokens
+        config.persona_model,
+        config.persona_temperature,
+        config.persona_max_tokens,
+        api_base=config.api_base,
     )
     configure_dspy_lm(persona_lm)
     judge_lm = build_lm(
-        config.judge_model, config.judge_temperature, config.judge_max_tokens
+        config.judge_model,
+        config.judge_temperature,
+        config.judge_max_tokens,
+        api_base=config.api_base,
     )
     reflection_lm = build_lm(
         config.reflection_model,
         config.reflection_temperature,
         config.reflection_max_tokens,
+        api_base=config.api_base,
     )
 
     program = PersonaAnswerProgram(lm=persona_lm)
@@ -195,6 +202,11 @@ def _build_parser() -> argparse.ArgumentParser:
     parser.add_argument("--judge-max-tokens", type=int, default=512)
     parser.add_argument("--reflection-max-tokens", type=int, default=512)
 
+    parser.add_argument(
+        "--api-base",
+        help="Optional API base URL for OpenAI-compatible endpoints.",
+    )
+
     parser.add_argument("--budget", default="light", choices=["light", "medium", "heavy"])
     parser.add_argument("--max-metric-calls", type=int)
     parser.add_argument("--num-threads", type=int, default=8)
@@ -238,6 +250,7 @@ def main(argv: List[str] | None = None) -> int:
         persona_max_tokens=args.persona_max_tokens,
         judge_max_tokens=args.judge_max_tokens,
         reflection_max_tokens=args.reflection_max_tokens,
+        api_base=args.api_base,
         budget=args.budget,
         max_metric_calls=args.max_metric_calls,
         num_threads=args.num_threads,

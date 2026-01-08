@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import inspect
+import os
 
 import dspy
 
@@ -41,14 +42,33 @@ def configure_dspy_lm(lm) -> None:
     ensure_dspy_lm_configured()
 
 
-def build_lm(model: str, temperature: float, max_tokens: int):
+def build_lm(
+    model: str,
+    temperature: float,
+    max_tokens: int,
+    api_base: str | None = None,
+    api_key: str | None = None,
+):
     """Build a DSPy LM, falling back across available providers."""
+    api_base = api_base or os.getenv("OPENAI_API_BASE") or os.getenv("OPENAI_BASE_URL")
+    api_key = api_key or os.getenv("OPENAI_API_KEY")
+    lm_kwargs = {
+        "model": model,
+        "temperature": temperature,
+        "max_tokens": max_tokens,
+    }
+    if api_base:
+        lm_kwargs["api_base"] = api_base
+    if api_key:
+        lm_kwargs["api_key"] = api_key
+
     if hasattr(dspy, "LM"):
-        return dspy.LM(model=model, temperature=temperature, max_tokens=max_tokens)
+        return dspy.LM(**filter_kwargs(dspy.LM, lm_kwargs))
 
     if hasattr(dspy, "OpenAI"):
         short_model = model.split("/", 1)[-1]
-        return dspy.OpenAI(model=short_model, temperature=temperature, max_tokens=max_tokens)
+        lm_kwargs["model"] = short_model
+        return dspy.OpenAI(**filter_kwargs(dspy.OpenAI, lm_kwargs))
 
     raise RuntimeError("No compatible DSPy LM backend found.")
 
