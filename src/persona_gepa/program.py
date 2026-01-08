@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+from typing import ClassVar
+
 import dspy
 
 
@@ -13,7 +15,7 @@ DEFAULT_INSTRUCTIONS = (
 class PersonaAnswerSignature(dspy.Signature):
     """You are answering as the interviewee. Use the provided transcript history to stay accurate and faithful to what was said. Match the interviewee's tone and style. If the answer is not supported by the transcript, say you do not know."""
 
-    instructions = DEFAULT_INSTRUCTIONS
+    instructions: ClassVar[str] = DEFAULT_INSTRUCTIONS
 
     history = dspy.InputField(desc="Transcript context in Q/A format.")
     question = dspy.InputField(desc="Current interview question.")

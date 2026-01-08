@@ -3,7 +3,7 @@ from __future__ import annotations
 import json
 import re
 from dataclasses import dataclass
-from typing import Dict
+from typing import ClassVar, Dict
 
 import dspy
 
@@ -38,7 +38,7 @@ class Judgment:
 class JudgeSignature(dspy.Signature):
     """You are a strict evaluator of interview answers. Score the candidate answer versus the reference answer and transcript history. Return ONLY a JSON object with keys: accuracy, faithfulness, tone, style, feedback. Each score must be a float in [0,1]. Feedback must be a short, actionable string."""
 
-    instructions = JUDGE_INSTRUCTIONS
+    instructions: ClassVar[str] = JUDGE_INSTRUCTIONS
 
     history = dspy.InputField(desc="Transcript history.")
     question = dspy.InputField(desc="Current question.")
