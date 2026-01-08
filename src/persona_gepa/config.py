@@ -42,7 +42,7 @@ class PersonaGEPAConfig:
             return {"max_metric_calls": self.max_metric_calls}
         if self.budget:
             return {"auto": self.budget}
-        return {}
+        return {"auto": "light"}
 
     def normalized_weights(self) -> Dict[str, float]:
         total = sum(self.score_weights.values())

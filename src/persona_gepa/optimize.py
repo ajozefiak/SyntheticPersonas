@@ -119,11 +119,11 @@ def run_optimization(
         "reflection_lm": reflection_lm,
         "teacher_lm": reflection_lm,
         "meta_lm": reflection_lm,
+        **config.resolved_budget(),
     }
     gepa = dspy.GEPA(**filter_kwargs(dspy.GEPA, gepa_kwargs))
 
     compile_kwargs = {
-        **config.resolved_budget(),
         "metric": metric,
     }
     compile_kwargs = filter_kwargs(gepa.compile, compile_kwargs)
