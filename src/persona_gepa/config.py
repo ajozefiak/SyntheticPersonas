@@ -6,9 +6,9 @@ from typing import Dict, Optional
 
 @dataclass
 class PersonaGEPAConfig:
-    persona_model: str = "openai/gpt-4o"
-    judge_model: str = "openai/gpt-4o"
-    reflection_model: str = "openai/gpt-4o"
+    persona_model: str = "openai/openai/gpt-4o"
+    judge_model: str = "openai/openai/gpt-4o"
+    reflection_model: str = "openai/openai/gpt-4o"
 
     persona_temperature: float = 0.2
     judge_temperature: float = 0.0
