@@ -19,12 +19,6 @@ from persona_gepa.program import PersonaAnswerProgram
 from persona_gepa.utils import build_lm, filter_kwargs
 
 
-def _configure_lm(persona_lm):
-    settings = getattr(dspy, "settings", None)
-    if settings is not None and hasattr(settings, "configure"):
-        settings.configure(lm=persona_lm)
-
-
 def _load_interviews_with_hook(path: str, loader_path: str | None):
     if not loader_path:
         return load_interviews(path)
@@ -105,8 +99,6 @@ def run_optimization(
         config.reflection_temperature,
         config.reflection_max_tokens,
     )
-
-    _configure_lm(persona_lm)
 
     program = PersonaAnswerProgram(lm=persona_lm)
     judge = JudgeProgram(lm=judge_lm)

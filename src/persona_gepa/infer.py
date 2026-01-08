@@ -23,10 +23,6 @@ def run_inference(
     persona_lm = build_lm(
         config.persona_model, config.persona_temperature, config.persona_max_tokens
     )
-    settings = getattr(dspy, "settings", None)
-    if settings is not None and hasattr(settings, "configure"):
-        settings.configure(lm=persona_lm)
-
     program = load_program(artifact_path, lm=persona_lm)
     prediction = program(
         history=history, question=question, persona_profile=persona_profile
