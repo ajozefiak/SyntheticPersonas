@@ -12,7 +12,7 @@ import dspy
 from persona_gepa.artifacts import save_artifact
 from persona_gepa.cache import configure_dspy_cache
 from persona_gepa.config import PersonaGEPAConfig
-from persona_gepa.data import build_examples, load_interviews, split_interviews
+from persona_gepa.data import build_examples, build_train_val_examples, load_interviews
 from persona_gepa.judge import JudgeProgram, parse_judge_output
 from persona_gepa.metric import build_metric, weighted_score
 from persona_gepa.program import PersonaAnswerProgram
@@ -205,14 +205,13 @@ def main(argv: List[str] | None = None) -> int:
         if not args.val_path:
             raise SystemExit("--val-path is required when using --train-path")
         val_interviews = _load_interviews_with_hook(args.val_path, args.loader)
+        trainset = build_examples(train_interviews)
+        valset = build_examples(val_interviews)
     else:
         interviews = _load_interviews_with_hook(args.data_path, args.loader)
-        train_interviews, val_interviews = split_interviews(
+        trainset, valset = build_train_val_examples(
             interviews, val_ratio=args.val_ratio, seed=args.seed
         )
-
-    trainset = build_examples(train_interviews)
-    valset = build_examples(val_interviews)
 
     config = PersonaGEPAConfig(
         persona_model=args.persona_model,

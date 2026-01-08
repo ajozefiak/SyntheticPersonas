@@ -7,8 +7,14 @@ from persona_gepa.optimize import run_optimization
 # In Databricks, load your processed interview data here.
 interviews = [
     [
-        {"q": "Where did you grow up?", "a": "I grew up in Austin."},
-        {"q": "What do you enjoy doing?", "a": "I like hiking and reading."},
+        {
+            "interviewer_question": "Where did you grow up?",
+            "respondent_answer": "I grew up in Austin.",
+        },
+        {
+            "interviewer_question": "What do you enjoy doing?",
+            "respondent_answer": "I like hiking and reading.",
+        },
     ]
 ]
 
@@ -25,6 +31,6 @@ print("Saved artifact:", artifact_path)
 print("Validation report:", report)
 
 history = format_history(interviews[0][:1])
-question = interviews[0][1]["q"]
+question = interviews[0][1]["interviewer_question"]
 answer = run_inference(config, artifact_path, history, question)
 print("Answer:", answer)

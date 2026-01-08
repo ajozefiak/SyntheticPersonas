@@ -20,13 +20,13 @@ export OPENAI_API_KEY=...
 
 ## Data Format
 
-Training data expects a list of interviews. Each interview is a list of turns with `q` and `a` keys:
+Training data expects a list of interviews. Each interview is a list of turns with `interviewer_question` and `respondent_answer` keys:
 
 ```json
 [
   [
-    {"q": "Where did you grow up?", "a": "I grew up in Austin."},
-    {"q": "What do you enjoy doing?", "a": "I like hiking and reading."}
+    {"interviewer_question": "Where did you grow up?", "respondent_answer": "I grew up in Austin."},
+    {"interviewer_question": "What do you enjoy doing?", "respondent_answer": "I like hiking and reading."}
   ]
 ]
 ```
