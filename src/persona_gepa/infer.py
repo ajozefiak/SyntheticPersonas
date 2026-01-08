@@ -9,7 +9,7 @@ import dspy
 from persona_gepa.artifacts import load_program
 from persona_gepa.cache import configure_dspy_cache
 from persona_gepa.config import PersonaGEPAConfig
-from persona_gepa.utils import build_lm
+from persona_gepa.utils import build_lm, configure_dspy_lm
 
 
 def run_inference(
@@ -23,10 +23,18 @@ def run_inference(
     persona_lm = build_lm(
         config.persona_model, config.persona_temperature, config.persona_max_tokens
     )
+    configure_dspy_lm(persona_lm)
     program = load_program(artifact_path, lm=persona_lm)
-    prediction = program(
-        history=history, question=question, persona_profile=persona_profile
-    )
+    context = getattr(dspy, "context", None)
+    if callable(context):
+        with context(lm=persona_lm):
+            prediction = program(
+                history=history, question=question, persona_profile=persona_profile
+            )
+    else:
+        prediction = program(
+            history=history, question=question, persona_profile=persona_profile
+        )
     return getattr(prediction, "answer", str(prediction))
 
 

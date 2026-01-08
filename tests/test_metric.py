@@ -21,7 +21,7 @@ def test_metric_shape_and_signature():
 
     result = metric(gold, pred, trace=None, pred_name=None, pred_trace=None)
 
-    assert "score" in result
-    assert "feedback" in result
-    assert isinstance(result["score"], float)
-    assert result["feedback"] == "ok"
+    assert hasattr(result, "score")
+    assert hasattr(result, "feedback")
+    assert isinstance(result.score, float)
+    assert result.feedback == "ok"

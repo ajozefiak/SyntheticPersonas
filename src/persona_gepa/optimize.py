@@ -16,7 +16,7 @@ from persona_gepa.data import build_examples, build_train_val_examples, load_int
 from persona_gepa.judge import JudgeProgram, parse_judge_output
 from persona_gepa.metric import build_metric, weighted_score
 from persona_gepa.program import PersonaAnswerProgram
-from persona_gepa.utils import build_lm, filter_kwargs
+from persona_gepa.utils import build_lm, configure_dspy_lm, filter_kwargs
 
 
 def _load_interviews_with_hook(path: str, loader_path: str | None):
@@ -34,6 +34,8 @@ def _evaluate_program(
     judge: JudgeProgram,
     weights: Dict[str, float],
     num_threads: int,
+    persona_lm=None,
+    judge_lm=None,
 ) -> Dict[str, float]:
     valset = list(valset)
     if not valset:
@@ -44,18 +46,36 @@ def _evaluate_program(
     aspect_totals = {"accuracy": 0.0, "faithfulness": 0.0, "tone": 0.0, "style": 0.0}
 
     def _score_example(example):
-        pred = program(
-            history=getattr(example, "history", ""),
-            question=getattr(example, "question", ""),
-            persona_profile=getattr(example, "persona_profile", ""),
-        )
+        context = getattr(dspy, "context", None)
+        if callable(context) and persona_lm is not None:
+            with context(lm=persona_lm):
+                pred = program(
+                    history=getattr(example, "history", ""),
+                    question=getattr(example, "question", ""),
+                    persona_profile=getattr(example, "persona_profile", ""),
+                )
+        else:
+            pred = program(
+                history=getattr(example, "history", ""),
+                question=getattr(example, "question", ""),
+                persona_profile=getattr(example, "persona_profile", ""),
+            )
         candidate_answer = getattr(pred, "answer", str(pred))
-        judge_pred = judge(
-            history=getattr(example, "history", ""),
-            question=getattr(example, "question", ""),
-            reference_answer=getattr(example, "answer", ""),
-            candidate_answer=candidate_answer,
-        )
+        if callable(context) and judge_lm is not None:
+            with context(lm=judge_lm):
+                judge_pred = judge(
+                    history=getattr(example, "history", ""),
+                    question=getattr(example, "question", ""),
+                    reference_answer=getattr(example, "answer", ""),
+                    candidate_answer=candidate_answer,
+                )
+        else:
+            judge_pred = judge(
+                history=getattr(example, "history", ""),
+                question=getattr(example, "question", ""),
+                reference_answer=getattr(example, "answer", ""),
+                candidate_answer=candidate_answer,
+            )
         raw_judgment = getattr(judge_pred, "judgment", judge_pred)
         judgment = parse_judge_output(raw_judgment)
         score = weighted_score(judgment, normalized)
@@ -91,6 +111,7 @@ def run_optimization(
     persona_lm = build_lm(
         config.persona_model, config.persona_temperature, config.persona_max_tokens
     )
+    configure_dspy_lm(persona_lm)
     judge_lm = build_lm(
         config.judge_model, config.judge_temperature, config.judge_max_tokens
     )
@@ -103,7 +124,7 @@ def run_optimization(
     program = PersonaAnswerProgram(lm=persona_lm)
     judge = JudgeProgram(lm=judge_lm)
 
-    metric = build_metric(judge, config.normalized_weights())
+    metric = build_metric(judge, config.normalized_weights(), judge_lm=judge_lm)
 
     gepa_kwargs = {
         "num_threads": config.num_threads,
@@ -140,6 +161,8 @@ def run_optimization(
         judge,
         config.normalized_weights(),
         config.num_threads,
+        persona_lm=persona_lm,
+        judge_lm=judge_lm,
     )
     if report:
         report_path = os.path.join(config.output_dir, "validation_report.json")

@@ -34,6 +34,9 @@ def configure_dspy_cache(cache_dir: str | None) -> None:
 
         if signature is not None:
             params = signature.parameters
+            if "disk_cache_dir" in params:
+                configure(disk_cache_dir=cache_dir)
+                return
             if "cache_dir" in params:
                 configure(cache_dir=cache_dir)
                 return

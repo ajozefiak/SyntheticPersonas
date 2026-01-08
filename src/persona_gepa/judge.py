@@ -51,7 +51,11 @@ class JudgeSignature(dspy.Signature):
 class JudgeProgram(dspy.Module):
     def __init__(self, lm=None):
         super().__init__()
-        self.predict = dspy.Predict(JudgeSignature, lm=lm)
+        self.predict = dspy.Predict(JudgeSignature)
+        if lm is not None:
+            self.predict.lm = lm
+            if hasattr(self.predict, "_lm"):
+                self.predict._lm = lm
 
     def forward(
         self,

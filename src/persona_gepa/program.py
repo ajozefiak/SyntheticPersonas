@@ -27,7 +27,11 @@ class PersonaAnswerSignature(dspy.Signature):
 class PersonaAnswerProgram(dspy.Module):
     def __init__(self, lm=None):
         super().__init__()
-        self.predict = dspy.Predict(PersonaAnswerSignature, lm=lm)
+        self.predict = dspy.Predict(PersonaAnswerSignature)
+        if lm is not None:
+            self.predict.lm = lm
+            if hasattr(self.predict, "_lm"):
+                self.predict._lm = lm
 
     def forward(self, history: str, question: str, persona_profile: str = ""):
         return self.predict(

@@ -2,6 +2,8 @@ from __future__ import annotations
 
 from typing import Dict, Optional
 
+import dspy
+
 from persona_gepa.judge import Judgment, parse_judge_output
 
 
@@ -19,7 +21,7 @@ def weighted_score(judgment: Judgment, weights: Dict[str, float]) -> float:
     return total
 
 
-def build_metric(judge_module, weights: Dict[str, float]):
+def build_metric(judge_module, weights: Dict[str, float], judge_lm=None):
     normalized = _normalize_weights(weights)
 
     def metric(gold, pred, trace=None, pred_name=None, pred_trace=None):
@@ -31,20 +33,26 @@ def build_metric(judge_module, weights: Dict[str, float]):
         if candidate_answer is None:
             candidate_answer = str(pred)
 
-        judge_pred = judge_module(
-            history=history,
-            question=question,
-            reference_answer=reference_answer,
-            candidate_answer=candidate_answer,
-        )
+        context = getattr(dspy, "context", None)
+        if callable(context) and judge_lm is not None:
+            with context(lm=judge_lm):
+                judge_pred = judge_module(
+                    history=history,
+                    question=question,
+                    reference_answer=reference_answer,
+                    candidate_answer=candidate_answer,
+                )
+        else:
+            judge_pred = judge_module(
+                history=history,
+                question=question,
+                reference_answer=reference_answer,
+                candidate_answer=candidate_answer,
+            )
         raw_judgment = getattr(judge_pred, "judgment", judge_pred)
         judgment = parse_judge_output(raw_judgment)
         score = weighted_score(judgment, normalized)
-        return {
-            "score": score,
-            "feedback": judgment.feedback,
-            "aspect_scores": judgment.as_dict(),
-        }
+        return dspy.Prediction(score=score, feedback=judgment.feedback)
 
     return metric
 
